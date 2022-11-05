@@ -138,3 +138,16 @@ import torch.nn as nn
 
 # intiliazing model with the embeddings size , output vector probability class , hidden layer size and weights
 
+class ParserModel(nn.Module):
+    
+    def __init__(self, feature_embeddings, feature_vector=50,
+        hiddenlayer_size=50, output_class=3, dropout_prob=0.5):
+        
+        super(ParserModel, self).__init__()
+        self.dropout_prob = dropout_prob
+        self.output_class = output_class
+        self.embedding_size = feature_embeddings.shape[1]
+        self.feature_vector = feature_vector
+        self.hiddenlayer_size = hiddenlayer_size
+        self.embeddings_weights = nn.Parameter(torch.tensor(feature_embeddings))
+
