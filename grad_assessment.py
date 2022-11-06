@@ -102,29 +102,6 @@ class Sentence_Parse(object):
         return self.dependencies
 
 
-def batch_parse(sentences, parse_model, batch_size):
-    #Parses a list of sentences in minibatches using a model.
-    dependencies = []
-
-    #assert batch_size != 0
-
-    stparse_objects = [Sentence_Parse(s) for s in sentences]
-    parses = stparse_objects
-
-    while parses:
-        sentence_batch = parses[:batch_size]
-        while sentence_batch:
-            transitions = parse_model.predict(sentence_batch)
-            # print(transitions)
-            for parse_obj,transition in zip(sentence_batch,transitions):
-                parse_obj.call_parse_step(transition)
-            sentence_batch = [parser for pr in sentence_batch if len(parse_obj.stack) > 1 or parse_obj.buffer]
-            # print(len(batch_parser))
-        sentence_batch = sentence_batch[batch_size:]
-    
-    dependencies = [parse_obj.dependencies for pr in stparse_objects]
-
-    return dependencies
 
 # implementing the model
 
@@ -150,4 +127,25 @@ class ParserModel(nn.Module):
         self.feature_vector = feature_vector
         self.hiddenlayer_size = hiddenlayer_size
         self.embeddings_weights = nn.Parameter(torch.tensor(feature_embeddings))
+        self.hiddenlayer = nn.Linear(self.embedding_size * self.feature_vector, self.hiddenlayer_size) # create a hidden layer with size embeddings_size * feature vector and output is a vector of a specific size defined
+        self.map_logits = nn.Linear(self.hiddenlayer_size,self.output_class) # hidden layer computed above is passed through the weights and an output vector of size 3 is generated
+        
+    def get_embeddings(self, input):
+
+      print("get embeddings")
+      
+      # will return the embeddings of the feature vector 
+
+
+    def forward(self, input_vector):
+      # to run the model forward 
+      final_embeddings = self.get_embeddings(input_vector)
+      final_embeddings= self.hiddenlayer(final_embeddings)
+      #final_embeddings = self.map_logits(self.hiddenlayer_size,self.output_class )
+      final_embeddings = nn.functional.relu(final_embeddings)
+      # final_embeddings = self.dropout(final_embeddings) #dropout to be decided
+      output_logits = self.map_logits(final_embeddings)
+
+      return output_logits   
+        
 
